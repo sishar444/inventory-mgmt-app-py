@@ -58,6 +58,11 @@ def run():
         list_products(products)
     elif operation.title() == "Show":
         show_product(products)
+    elif operation.title() == "Create":
+        id = get_largest_product_id(products)
+        products.append(create_product_with_id(id+1))
+    elif operation.title() == "Update":
+        products = update_product(products)
     elif operation.title() == "Destroy":
         # Overwrite products list with new list
         products = destroy_product(products)
@@ -69,22 +74,40 @@ def run():
     # Finally, save products to file so they persist after script is done...
     write_products_to_file(products=products)
 
-
+#
+# Helper functions
+#
 def product_by_id(product_id, products):
     return [product for product in products if str(product["id"]) == product_id]
 
+# Used to extract plain dictionary from object returned in product_by_id()
 def product_as_dict(product_list):
     return dict(product_list[0])
 
+def prod_id(row):
+    return int(row["id"])
+
+def get_largest_product_id(products):
+    sorted_products = sorted(products, key=prod_id)
+    sorted_products.reverse()
+    top_prod = sorted_products[0]
+    return int(top_prod["id"])
+
+#
+# List Products
+#
 def list_products(products):
     header_string = f"--------------------------------\nLISTING {len(products)} PRODUCTS:\n--------------------------------"
     print(header_string)
     for product in products:
         print(" #" + product["id"] + ":", product["name"])
 
+#
+# Show Product
+#
 def show_product(products):
     product_id = input("Ok. Please specify the product's identifier: ")
-    header_string = f"--------------------------------\nSHOWING A PRODUCT:\n--------------------------------"
+    header_string = "--------------------------------\nSHOWING A PRODUCT:\n--------------------------------"
     print(header_string)
     product_list = product_by_id(product_id, products)
     if len(product_list) > 0:
@@ -92,9 +115,44 @@ def show_product(products):
     else:
         print("There is no product with that identifier.")
 
+#
+# Create Product
+#
+def create_product_with_id(id):
+    product_name = input("Ok. Please input the product's 'name': ")
+    product_aisle = input("Ok. Please input the product's 'aisle': ")
+    product_dept = input("Ok. Please input the product's 'department': ")
+    product_price = input("Ok. Please input the product's 'price': ")
+    header_string = "--------------------------------\nCREATING A NEW PRODUCT:\n--------------------------------"
+    print(header_string)
+    product_dict = {"id": id, "name": product_name, "aisle": product_aisle, "department": product_dept, "price": product_price}
+    print(product_dict)
+    return product_dict
+
+#
+# Update Product
+#
+def update_product(products):
+    product_id = input("Ok. Please specify the product's identifier: ")
+    prod_list = product_by_id(product_id, products)
+    prod_dict = product_as_dict(prod_list)
+    product_name = input(f"Ok. What is the product's new 'name' (currently '{prod_dict['name']}'): ")
+    product_aisle = input(f"Ok. What is the product's new 'aisle' (currently '{prod_dict['aisle']}'): ")
+    product_dept = input(f"Ok. What is the product's new 'department' (currently '{prod_dict['department']}'): ")
+    product_price = input(f"Ok. What is the product's new 'price' (currently '{prod_dict['price']}'): ")
+    header_string = "--------------------------------\nUPDATING A PRODUCT:\n--------------------------------"
+    print(header_string)
+    product_dict = {"id": product_id, "name": product_name, "aisle": product_aisle, "department": product_dept, "price": product_price}
+    print(product_dict)
+    products = [product_dict if prod.get('id') == product_id else prod for prod in products]
+    return products
+
+#
+# Destroy Product
+#
 def destroy_product(products):
     product_id = input("Ok. Please specify the product's identifier: ")
-    header_string = f"--------------------------------\nDESTROYING A PRODUCT:\n--------------------------------"
+    header_string = "--------------------------------\nDESTROYING A PRODUCT:\n--------------------------------"
     print(header_string)
     # Print the details of product to be deleted
     product_list = product_by_id(product_id, products)
