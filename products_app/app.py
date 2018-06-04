@@ -59,7 +59,7 @@ def run():
     elif operation.title() == "Show":
         show_product(products)
     elif operation.title() == "Create":
-        id = get_largest_product_id(products)
+        id = get_largest_product_id(products) if len(products) > 0 else 0
         products.append(create_product_with_id(id+1))
     elif operation.title() == "Update":
         products = update_product(products)
@@ -107,10 +107,10 @@ def list_products(products):
 #
 def show_product(products):
     product_id = input("Ok. Please specify the product's identifier: ")
-    header_string = "--------------------------------\nSHOWING A PRODUCT:\n--------------------------------"
-    print(header_string)
     product_list = product_by_id(product_id, products)
     if len(product_list) > 0:
+        header_string = "--------------------------------\nSHOWING A PRODUCT:\n--------------------------------"
+        print(header_string)
         print(product_as_dict(product_list))
     else:
         print("There is no product with that identifier.")
@@ -135,16 +135,20 @@ def create_product_with_id(id):
 def update_product(products):
     product_id = input("Ok. Please specify the product's identifier: ")
     prod_list = product_by_id(product_id, products)
-    prod_dict = product_as_dict(prod_list)
-    product_name = input(f"Ok. What is the product's new 'name' (currently '{prod_dict['name']}'): ")
-    product_aisle = input(f"Ok. What is the product's new 'aisle' (currently '{prod_dict['aisle']}'): ")
-    product_dept = input(f"Ok. What is the product's new 'department' (currently '{prod_dict['department']}'): ")
-    product_price = input(f"Ok. What is the product's new 'price' (currently '{prod_dict['price']}'): ")
-    header_string = "--------------------------------\nUPDATING A PRODUCT:\n--------------------------------"
-    print(header_string)
-    product_dict = {"id": product_id, "name": product_name, "aisle": product_aisle, "department": product_dept, "price": product_price}
-    print(product_dict)
-    products = [product_dict if prod.get('id') == product_id else prod for prod in products]
+    if len(prod_list) > 0:
+        prod_dict = product_as_dict(prod_list)
+        product_name = input(f"Ok. What is the product's new 'name' (currently '{prod_dict['name']}'): ")
+        product_aisle = input(f"Ok. What is the product's new 'aisle' (currently '{prod_dict['aisle']}'): ")
+        product_dept = input(f"Ok. What is the product's new 'department' (currently '{prod_dict['department']}'): ")
+        product_price = input(f"Ok. What is the product's new 'price' (currently '{prod_dict['price']}'): ")
+        header_string = "--------------------------------\nUPDATING A PRODUCT:\n--------------------------------"
+        print(header_string)
+        product_dict = {"id": product_id, "name": product_name, "aisle": product_aisle, "department": product_dept, "price": product_price}
+        print(product_dict)
+        products = [product_dict if prod.get('id') == product_id else prod for prod in products]
+    else:
+        print("There is no product with that identifier.")
+
     return products
 
 #
@@ -152,11 +156,11 @@ def update_product(products):
 #
 def destroy_product(products):
     product_id = input("Ok. Please specify the product's identifier: ")
-    header_string = "--------------------------------\nDESTROYING A PRODUCT:\n--------------------------------"
-    print(header_string)
     # Print the details of product to be deleted
     product_list = product_by_id(product_id, products)
     if len(product_list) > 0:
+        header_string = "--------------------------------\nDESTROYING A PRODUCT:\n--------------------------------"
+        print(header_string)
         print(product_as_dict(product_list))
         # Update passed in list to remove product with that id
         products = [prod for prod in products if prod.get('id') != product_id]
